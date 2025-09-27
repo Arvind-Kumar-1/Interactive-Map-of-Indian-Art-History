@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>An Artistic Journey Through Ancient India</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body {
+            font-family: 'Lora', serif;
+            background-color: #fdf6e3; /* Parchment color */
+            overflow-y: hidden; /* Prevent body scroll */
+            color: #583e2e; /* Dark brown text */
+        }
+        .header-font {
+            font-family: 'Playfair Display', serif;
+        }
+        /* Style for the map to look ancient */
+        .leaflet-tile-pane {
+            filter: sepia(60%) contrast(1.1) brightness(0.9) grayscale(10%);
+        }
+        /* Custom Leaflet popup styles for an ancient look */
+        .leaflet-popup-content-wrapper {
+            background-color: #fdf6e3;
+            border-radius: 4px;
+            border: 1px solid #dcd1b8;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .leaflet-popup-tip {
+            background-color: #fdf6e3;
+        }
+        .leaflet-popup-content {
+            margin: 15px;
+            font-size: 14px;
+            line-height: 1.7;
+            max-width: 280px;
+        }
+        .popup-image-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .popup-image {
+            width: 50%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #dcd1b8;
+        }
+        .popup-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+            color: #3a2a1d;
+        }
+        /* Sidebar styling for an ancient look */
+        .sidebar {
+            height: calc(100vh - 12rem);
+            overflow-y: auto;
+            background-color: rgba(245, 235, 215, 0.6); /* Translucent parchment */
+            border: 1px solid #dcd1b8;
+        }
+        /* Custom scrollbar */
+        .sidebar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: #fdf6e3;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #c8bda5;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <!-- Main Container -->
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold header-font">An Artistic Journey Through Ancient India</h1>
+            <p class="text-lg text-gray-600 mt-2 italic">Discover the rich tapestry of Indian art across the ages.</p>
+        </header>
+
+        <div class="flex flex-col md:flex-row gap-8">
+            <!-- Sidebar with locations list -->
+            <div id="locations-list" class="w-full md:w-1/3 lg:w-1/4 p-4 rounded-lg shadow-md sidebar">
+                <h2 class="text-2xl font-bold mb-4 border-b border-gray-400 pb-2 header-font">Art Hotspots</h2>
+                <!-- Location items will be dynamically inserted here -->
+            </div>
+
+            <!-- Map Container -->
+            <div id="map" class="w-full md:w-2/3 lg:w-3/4 h-[75vh] rounded-lg shadow-lg z-10 border-2 border-[#dcd1b8]"></div>
+        </div>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Initialize the map
+            const map = L.map('map').setView([22.5937, 78.9629], 5);
+
+            // 2. Add a vintage-style tile layer
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            }).addTo(map);
+
+            // 3. Define the art locations data with more images
+            const artLocations = [
+                 {
+                    lat: 27.4744,
+                    lng: 68.1322,
+                    name: 'Indus Valley Art',
+                    era: 'Ancient',
+                    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Shiva_Pashupati.jpg/800px-Shiva_Pashupati.jpg/800px-Pashupati_seal.jpg',
+                    img2: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0b/Dancing_girl_of_Mohenjo-daro.jpg/800px-Dancing_girl_of_Mohenjo-daro.jpg',
+                    desc: 'Centered in Mohenjo-daro, this civilization produced intricate steatite seals and the famous "Dancing Girl" bronze statuette, showcasing sophisticated early artistry.'
+                },
+                {
+                    lat: 22.9333,
+                    lng: 77.6,
+                    name: 'Bhimbetka Rock Shelters',
+                    era: 'Ancient',
+                    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rock_Shelter_8%2C_Bhimbetka_02.jpg/1280px-Rock_Shelter_8%2C_Bhimbetka_02.jpg/1024px-Bhimbetka_Rock_Shelter_Paintings.jpg',
+                    img2: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Rock_Shelter_8%2C_Bhimbetka_02.jpg/1280px-Rock_Shelter_8%2C_Bhimbetka_02.jpg',
+                    desc: 'A UNESCO site with prehistoric paintings offering a glimpse into the earliest forms of art on the subcontinent, from the Paleolithic to medieval periods.'
+                },
+                {
+                    lat: 25.3176,
+                    lng: 82.9739,
+                    name: 'Sarnath & Mauryan Art',
+                    era: 'Ancient',
+                    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/38/Sarnath_capital.jpg/800px-Sarnath_capital.jpg',
+                    img2: 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Sarnath_Dhamek_Stupa_1814.jpg/800px-Sarnath_Lion_Capital.jpg',
+                    desc: 'A pivotal site for Mauryan art. The Lion Capital of Ashoka, now the national emblem of India, represents the nation\'s ideals.'
+                },
+                 {
+                    lat: 27.4924,
+                    lng: 77.6737,
+                    name: 'Mathura School of Art',
+                    era: 'Classical',
+                    img: 'https://www.artic.edu/iiif/2/db19981f-a26c-68e9-bfeb-2c19071422d1/full/843,/0/default.jpg/800px-Standing_Buddha_from_Mathura_-_Art_Institute_of_Chicago.jpg',
+                    img2: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a6/Kanishka_enhanced.jpg/500px-Kanishka_enhanced.jpg/800px-Kanishka_statue_from_Mathura.jpg',
+                    desc: 'A major center for red sandstone sculptures from the 1st to 3rd centuries CE, known for its distinct sculptures of Buddha with indigenous Indian features.'
+                },
+                {
+                    lat: 20.552,
+                    lng: 75.753,
+                    name: 'Ajanta & Ellora Caves',
+                    era: 'Classical',
+                    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Ajanta_%2863%29.jpg/500px-Ajanta_%2863%29.jpg/1024px-Ajanta_cave_26_-_main_shrine.jpg',
+                    img2: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/fc/Kailash_temple_%28Ellora_cave_no_15%29_at_Verul.png/500px-Kailash_temple_%28Ellora_cave_no_15%29_at_Verul.png/1024px-Kailasa_Temple_Ellora.jpg',
+                    desc: 'Famous for monumental rock-cut caves. The murals of Ajanta and monolithic Kailasa temple at Ellora are masterpieces of religious art.'
+                },
+                {
+                    lat: 10.7870,
+                    lng: 79.1378,
+                    name: 'Thanjavur & Chola Art',
+                    era: 'Medieval',
+                    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Shiva_as_the_Lord_of_Dance_LACMA_edit.jpg/500px-Shiva_as_the_Lord_of_Dance_LACMA_edit.jpg/800px-Shiva_as_Nataraja%2C_the_Lord_of_Dance_LACMA_AC1993.159.1.jpg',
+                    img2: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/Thanjavur_art_from_south_India.jpg/500px-Thanjavur_art_from_south_India.jpg',
+                    desc: 'The heart of the Chola Dynasty, renowned for perfecting bronze casting (Nataraja) and developing the iconic, gold-leaf Thanjavur painting style.'
+                },
+                {
+                    lat: 26.9124,
+                    lng: 75.7873,
+                    name: 'Jaipur & Miniature Painting',
+                    era: 'Medieval',
+                    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/4_Radha_%28Bani_Thani%29%2C_Kishangarh%2C_ca._1750%2C_National_Museum_New_Delhi.jpg/675px-4_Radha_%28Bani_Thani%29%2C_Kishangarh%2C_ca._1750%2C_National_Museum_New_Delhi.jpg/800px-Radha_-_Bani_Thani_-_by_Nihal_Chand.jpg',
+                    img2: 'https://upload.wikimedia.org/wikipedia/commons/6/63/Jahangir_and_Prince_Khurram_feasted_by_Nur_Jahan_-_Google_Art_Project.jpg',
+                    desc: 'A center for Rajput and Mughal miniature painting. The Kishangarh school produced iconic works like "Bani Thani," known for its elegant and stylized features.'
+                },
+                {
+                    lat: 22.5726,
+                    lng: 88.3639,
+                    name: 'Kolkata & The Bengal School',
+                    era: 'Modern',
+                    img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Bharat_Mata_by_Abanindranath_Tagore.jpg/500px-Bharat_Mata_by_Abanindranath_Tagore.jpg',
+                    img2: 'https://www.singulart.com/blog/wp-content/uploads/2024/02/Three-Pujarians-1.jpg',
+                    desc: 'Birthplace of the Bengal School of Art (Tagore, Jamini Roy), a movement seeking a modern artistic identity rooted in Indian traditions.'
+                },
+                {
+                    lat: 19.0760,
+                    lng: 72.8777,
+                    name: 'Mumbai & Contemporary Art',
+                    era: 'Modern',
+                    img: 'https://borderlessjournal.com/wp-content/uploads/2023/02/img_20221114_113719.jpg/800px-Mother_Teresa_by_M.F._Husain.jpg',
+                    img2: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/JAG_From_Outside.jpg/500px-JAG_From_Outside.jpg',
+                    desc: 'A vibrant hub for contemporary Indian art, home to galleries like Jehangir and artists like M.F. Husain of the Progressive Artists\' Group.'
+                }
+            ];
+            
+            const locationsList = document.getElementById('locations-list');
+            const markers = {};
+
+            // 4. Loop through locations to create list items and markers
+            artLocations.forEach(location => {
+                // Create list item in sidebar
+                const listItem = document.createElement('div');
+                listItem.className = 'p-3 mb-2 cursor-pointer hover:bg-[#e9dec7] rounded-md transition-colors duration-200';
+                listItem.innerHTML = `
+                    <h3 class="font-bold text-lg header-font">${location.name}</h3>
+                    <p class="text-sm text-gray-500 italic">${location.era}</p>
+                `;
+                listItem.addEventListener('click', () => {
+                    map.flyTo([location.lat, location.lng], 8);
+                    markers[location.name].openPopup();
+                });
+                locationsList.appendChild(listItem);
+
+                // Create marker on map
+                const marker = L.marker([location.lat, location.lng]).addTo(map);
+                
+                const popupContent = `
+                    <div>
+                        <div class="popup-image-container">
+                           <img src="${location.img}" alt="${location.name}" class="popup-image" onerror="this.style.display='none'">
+                           <img src="${location.img2}" alt="${location.name}" class="popup-image" onerror="this.style.display='none'">
+                        </div>
+                        <h3 class="popup-title">${location.name}</h3>
+                        <p>${location.desc}</p>
+                    </div>
+                `;
+                
+                marker.bindPopup(popupContent);
+                markers[location.name] = marker;
+            });
+        });
+    </script>
+
+</body>
+</html>
+
